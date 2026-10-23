@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng Ký Tài Khoản Khách Hàng · Saigon Grand Luxury Hotel{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-icon" style="margin: 0 auto 1rem; width: 54px; height: 54px; font-size: 1.8rem;">SG</div>
+      <h1 class="auth-title">Đăng Ký Thành Viên</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Đặt phòng nhanh chóng và nhận ưu đãi độc quyền</p>
+    </div>
+
+    {% if error %}
+      <div style="background: rgba(244, 63, 94, 0.15); border: 1px solid var(--rose); color: #fda4af; padding: 0.8rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-size: 0.9rem;">
+        <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+      </div>
+    {% endif %}
+
+    <form method="POST" action="/register" style="display: flex; flex-direction: column; gap: 1.1rem;">
+      <div class="filter-group">
+        <label for="username">Tên Đăng Nhập (Tối thiểu 3 ký tự)</label>
+        <input type="text" id="username" name="username" required autofocus class="form-control" placeholder="nguyenvanan">
+      </div>
+
+      <div class="filter-group">
+        <label for="name">Họ Và Tên</label>
+        <input type="text" id="name" name="name" required class="form-control" placeholder="Nguyễn Văn An">
+      </div>
+
+      <div class="filter-group">
+        <label for="phone">Số Điện Thoại</label>
+        <input type="tel" id="phone" name="phone" required class="form-control" placeholder="0901234567">
+      </div>
+
+      <div class="filter-group">
+        <label for="email">Địa Chỉ Email</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="an.nguyen@gmail.com">
+      </div>
+
+      <div class="filter-group">
+        <label for="password">Mật Khẩu (Tối thiểu 6 ký tự)</label>
+        <input type="password" id="password" name="password" required class="form-control" placeholder="••••••••">
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.8rem; padding: 0.8rem;">
+        <i class="fa-solid fa-user-plus"></i> Hoàn Tất Đăng Ký
+      </button>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: var(--text-muted);">
+      Đã có tài khoản? <a href="/login" style="color: var(--gold); font-weight: 600;">Đăng nhập ngay</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

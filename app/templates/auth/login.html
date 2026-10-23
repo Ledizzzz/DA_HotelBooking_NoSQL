@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Đăng Nhập · Saigon Grand Luxury Hotel{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-icon" style="margin: 0 auto 1rem; width: 54px; height: 54px; font-size: 1.8rem;">SG</div>
+      <h1 class="auth-title">Đăng Nhập Hệ Thống</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Truy cập bảng điều khiển phân quyền 3 cấp độ</p>
+    </div>
+
+    {% if error %}
+      <div style="background: rgba(244, 63, 94, 0.15); border: 1px solid var(--rose); color: #fda4af; padding: 0.8rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-size: 0.9rem;">
+        <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+      </div>
+    {% endif %}
+
+    {% if msg %}
+      <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--emerald); color: #6ee7b7; padding: 0.8rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-size: 0.9rem;">
+        <i class="fa-solid fa-circle-check"></i> {{ msg }}
+      </div>
+    {% endif %}
+
+    <form method="POST" action="/login" style="display: flex; flex-direction: column; gap: 1.2rem;">
+      <div class="filter-group">
+        <label for="usernameInput">Tên Đăng Nhập</label>
+        <input type="text" id="usernameInput" name="username" required autofocus class="form-control" placeholder="admin, letan hoặc khachhang">
+      </div>
+
+      <div class="filter-group">
+        <label for="passwordInput">Mật Khẩu</label>
+        <input type="password" id="passwordInput" name="password" required class="form-control" placeholder="••••••••">
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.8rem;">
+        <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập
+      </button>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: var(--text-muted);">
+      Bạn là khách hàng mới? <a href="/register" style="color: var(--gold); font-weight: 600;">Đăng ký tài khoản ngay</a>
+    </div>
+
+    <!-- HỘP ĐIỀN NHANH TÀI KHOẢN MẪU ĐỂ CHẤM ĐỒ ÁN / DEMO -->
+    <div class="quick-demo-box">
+      <div class="quick-demo-title"><i class="fa-solid fa-bolt"></i> Điền Nhanh Tài Khoản Demo (Chấm Thi):</div>
+      <div class="quick-btn-grid">
+        <button type="button" class="btn btn-sm btn-secondary" onclick="fillLogin('admin', 'admin123')">
+          <i class="fa-solid fa-shield-halved"></i> Admin
+        </button>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="fillLogin('letan', 'letan123')">
+          <i class="fa-solid fa-bell-concierge"></i> Lễ Tân
+        </button>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="fillLogin('khachhang', 'khach123')">
+          <i class="fa-solid fa-user"></i> Khách Hàng
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function fillLogin(u, p) {
+    document.getElementById('usernameInput').value = u;
+    document.getElementById('passwordInput').value = p;
+  }
+</script>
+{% endblock %}

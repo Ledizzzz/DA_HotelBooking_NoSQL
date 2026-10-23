@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Phòng {{ room.SoPhong }} - {{ room.TenLoaiPhong }} · Saigon Grand Luxury Hotel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem;">
+  <div style="margin-bottom: 1.5rem;">
+    <a href="/" style="color: var(--text-muted); font-size: 0.9rem;">
+      <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách phòng
+    </a>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2.5rem; align-items: flex-start;">
+    <!-- CỘT TRÁI: ẢNH VÀ THÔNG TIN CHI TIẾT -->
+    <div>
+      <div style="border-radius: var(--radius-lg); overflow: hidden; height: 420px; box-shadow: var(--shadow-card); position: relative; margin-bottom: 2rem;">
+        <img src="{{ room.HinhAnh or '/static/uploads/default-room.jpg' }}" alt="{{ room.TenLoaiPhong }}" style="width: 100%; height: 100%; object-fit: cover;">
+        <div class="room-floor-tag" style="top: 1.5rem; right: 1.5rem; font-size: 0.9rem;">
+          <i class="fa-solid fa-stairs"></i> Tầng {{ room.Tang }}
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+        <span class="room-number" style="font-size: 1rem;"><i class="fa-solid fa-door-open"></i> PHÒNG {{ room.SoPhong }}</span>
+        {% set st = room.TrangThai %}
+        {% if st == 'Trống' %}
+          <span class="status-badge badge-trong" data-room-badge="{{ room.MaPhong }}">Trống</span>
+        {% elif st == 'Đã giữ' %}
+          <span class="status-badge badge-da-giu" data-room-badge="{{ room.MaPhong }}">Đã giữ</span>
+        {% elif st == 'Đang ở' %}
+          <span class="status-badge badge-dang-o" data-room-badge="{{ room.MaPhong }}">Đang ở</span>
+        {% elif st == 'Cần dọn dẹp' %}
+          <span class="status-badge badge-can-don" data-room-badge="{{ room.MaPhong }}">Cần dọn dẹp</span>
+        {% else %}
+          <span class="status-badge badge-bao-tri" data-room-badge="{{ room.MaPhong }}">{{ st }}</span>
+        {% endif %}
+      </div>
+
+      <h1 class="section-title" style="margin-bottom: 1rem;">{{ room.TenLoaiPhong }}</h1>
+
+      <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.8; margin-bottom: 2rem;">
+        {{ room.MoTa }}
+      </p>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.8rem; margin-bottom: 2rem;">
+        <h3 style="font-family: var(--font-heading); color: var(--gold); font-size: 1.25rem; margin-bottom: 1.2rem;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Tiện Ích Phòng Tiêu Chuẩn 5 Sao
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          {% for am in room.TienNghi %}
+            <div style="display: flex; align-items: center; gap: 0.6rem; color: #cbd5e1; font-size: 0.95rem;">
+              <i class="fa-solid fa-circle-check" style="color: var(--emerald);"></i> {{ am }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- CỘT PHẢI: FORM ĐẶT PHÒNG NHANH -->
+    <div style="position: sticky; top: 90px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; box-shadow: var(--shadow-card);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+        <div>
+          <span style="font-size: 1.8rem; font-weight: 800; color: var(--gold);">{{ "{:,.0f}".format(room.GiaMoiDem) }} đ</span>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">/ đêm</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 0.85rem;">
+          <i class="fa-solid fa-user-group"></i> Tối đa: <strong>{{ room.SoKhachToiDa }} khách</strong>
+        </div>
+      </div>
+
+      <form method="POST" action="/book" style="display: flex; flex-direction: column; gap: 1.2rem;">
+        <input type="hidden" name="room_id" value="{{ room.MaPhong }}">
+
+        <div class="filter-group">
+          <label for="detail_check_in"><i class="fa-regular fa-calendar-days"></i> Ngày Nhận Phòng</label>
+          <input type="date" id="detail_check_in" name="check_in" required class="form-control">
+        </div>
+
+        <div class="filter-group">
+          <label for="detail_check_out"><i class="fa-regular fa-calendar-check"></i> Ngày Trả Phòng</label>
+          <input type="date" id="detail_check_out" name="check_out" required class="form-control">
+        </div>
+
+        <div class="filter-group">
+          <label for="detail_note"><i class="fa-regular fa-comment-dots"></i> Yêu Cầu Đặc Biệt</label>
+          <textarea id="detail_note" name="note" rows="2" class="form-control" placeholder="Thời gian dự kiến check-in, đón tại sân bay..."></textarea>
+        </div>
+
+        {% if room.TrangThai == 'Trống' %}
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem;" data-book-btn="{{ room.MaPhong }}">
+            <i class="fa-solid fa-bolt"></i> Đặt Phòng Ngay
+          </button>
+        {% else %}
+          <button type="button" class="btn btn-secondary" style="width: 100%; padding: 0.9rem;" disabled data-book-btn="{{ room.MaPhong }}">
+            {{ room.TrangThai }}
+          </button>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const formatDate = (d) => d.toISOString().split('T')[0];
+  document.getElementById('detail_check_in').value = formatDate(today);
+  document.getElementById('detail_check_out').value = formatDate(tomorrow);
+  document.getElementById('detail_check_in').min = formatDate(today);
+  document.getElementById('detail_check_out').min = formatDate(tomorrow);
+</script>
+{% endblock %}

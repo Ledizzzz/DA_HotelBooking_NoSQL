@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Khách Sạn Sài Gòn Grand Luxury{% endblock %}</title>
+
+  <!-- Google Fonts: Playfair Display (Tiêu đề sang trọng) & Plus Jakarta Sans (Nội dung) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- CSS chính -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- THANH ĐIỀU HƯỚNG CHÍNH (NAVBAR) -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <div class="brand-icon">SG</div>
+      <div>
+        <div class="brand-name">SAIGON GRAND</div>
+        <div class="brand-sub">LUXURY HOTEL & RESORT · DYNAMODB</div>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="/" class="nav-item"><i class="fa-solid fa-bed"></i> Khám Phá Phòng</a></li>
+
+      {% if user %}
+        {% if user.role == 'customer' %}
+          <li><a href="/my-bookings" class="nav-item"><i class="fa-solid fa-receipt"></i> Đơn Đặt Của Tôi</a></li>
+        {% endif %}
+
+        {% if user.role in ['receptionist', 'admin'] %}
+          <li><a href="/receptionist" class="nav-item"><i class="fa-solid fa-table-cells"></i> Bảng Lễ Tân</a></li>
+        {% endif %}
+
+        {% if user.role == 'admin' %}
+          <li><a href="/admin/rooms" class="nav-item"><i class="fa-solid fa-hotel"></i> Quản Lý Phòng</a></li>
+          <li><a href="/admin/users" class="nav-item"><i class="fa-solid fa-users-gear"></i> Tài Khoản</a></li>
+          <li><a href="/admin/backup" class="nav-item"><i class="fa-solid fa-database"></i> Sao Lưu NoSQL</a></li>
+        {% endif %}
+      {% endif %}
+
+      <!-- Link Swagger API Documentation cho Giảng viên xem -->
+      <li><a href="/docs" target="_blank" class="nav-item" style="color: #38bdf8;"><i class="fa-solid fa-code"></i> Swagger API</a></li>
+    </ul>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <!-- Huy hiệu kết nối WebSocket thời gian thực -->
+      <div class="live-indicator" id="liveIndicator">
+        <span class="live-dot"></span>
+        <span id="liveText">Realtime Đang Bật</span>
+      </div>
+
+      {% if user %}
+        <div class="user-badge">
+          <div class="user-avatar">{{ user.name[0] | upper }}</div>
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #ffffff;">{{ user.name }}</div>
+            <div style="font-size: 0.72rem; color: var(--gold); text-transform: uppercase;">
+              {% if user.role == 'admin' %}Quản Trị Viên{% elif user.role == 'receptionist' %}Lễ Tân Khách Sạn{% else %}Khách Hàng{% endif %}
+            </div>
+          </div>
+          <a href="/logout" title="Đăng xuất" style="color: var(--rose); margin-left: 0.5rem; font-size: 0.9rem;">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </a>
+        </div>
+      {% else %}
+        <div style="display: flex; gap: 0.6rem;">
+          <a href="/login" class="btn btn-sm btn-secondary">Đăng Nhập</a>
+          <a href="/register" class="btn btn-sm btn-primary">Đăng Ký</a>
+        </div>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- NỘI DUNG CHÍNH TỪNG TRANG -->
+  <main style="flex-grow: 1;">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- CHÂN TRANG (FOOTER) -->
+  <footer class="footer">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 1rem;">
+      <div>
+        <strong style="color: var(--gold);">Saigon Grand Luxury Hotel</strong> · Hệ thống đặt phòng thời gian thực
+      </div>
+      <div>
+        Đồ án môn học: <strong>Cơ sở dữ liệu NoSQL (Amazon DynamoDB Single-Table Design)</strong>
+      </div>
+      <div>
+        Khu vực: <code>ap-southeast-1 (Singapore)</code>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Container chứa thông báo Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript chính -->
+  <script src="/static/js/main.js"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

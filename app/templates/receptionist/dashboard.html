@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Bảng Điều Khiển Lễ Tân · Saigon Grand Luxury Hotel{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+    <div>
+      <h1 class="section-title"><i class="fa-solid fa-bell-concierge" style="color: var(--gold);"></i> Bảng Điều Khiển Lễ Tân (Realtime)</h1>
+      <p class="section-sub">Giám sát ma trận phòng và quy trình Check-in / Check-out thời gian thực qua WebSocket</p>
+    </div>
+    <div style="color: var(--text-muted); font-size: 0.9rem;">
+      Nhân viên trực: <strong style="color: #ffffff;">{{ user.name }}</strong>
+    </div>
+  </div>
+
+  {% if msg %}
+    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--emerald); color: #6ee7b7; padding: 1rem 1.4rem; border-radius: var(--radius-sm); margin-bottom: 2rem;">
+      <i class="fa-solid fa-circle-check"></i> {{ msg }}
+    </div>
+  {% endif %}
+
+  <!-- THẺ THỐNG KÊ NHANH TÌNH TRẠNG PHÒNG -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem;">
+    <div style="background: var(--bg-card); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--emerald); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+        <i class="fa-solid fa-door-open"></i>
+      </div>
+      <div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ stats.available }}</div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--emerald); font-weight: 700;">Phòng Trống Sẵn Sàng</div>
+      </div>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); color: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+        <i class="fa-solid fa-clock"></i>
+      </div>
+      <div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ stats.reserved }}</div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--amber); font-weight: 700;">Đã Giữ / Chờ Nhận</div>
+      </div>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+        <i class="fa-solid fa-users"></i>
+      </div>
+      <div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ stats.occupied }}</div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--blue); font-weight: 700;">Đang Có Khách Ở</div>
+      </div>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(168, 85, 247, 0.15); color: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+        <i class="fa-solid fa-broom"></i>
+      </div>
+      <div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ stats.cleaning }}</div>
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--purple); font-weight: 700;">Cần Dọn Dẹp Phòng</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHẦN 1: MA TRẬN PHÒNG TRỰC QUAN (ROOM MATRIX) -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 3rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+      <h2 style="font-family: var(--font-heading); color: #ffffff; font-size: 1.4rem;">
+        <i class="fa-solid fa-table-cells-large" style="color: var(--gold);"></i> Ma Trận Phòng Khách Sạn
+      </h2>
+      <span style="font-size: 0.85rem; color: var(--text-muted);">Tự động đổi màu khi trạng thái thay đổi</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.4rem;">
+      {% for room in rooms %}
+        <div id="matrix-room-{{ room.MaPhong }}" style="background: rgba(11, 19, 41, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-sm); padding: 1.2rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+            <div>
+              <span class="room-number" style="font-size: 1.1rem;">P.{{ room.SoPhong }}</span>
+              <div style="font-size: 0.85rem; color: #ffffff; font-weight: 600; margin-top: 0.2rem;">{{ room.TenLoaiPhong }}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-stairs"></i> Tầng {{ room.Tang }} · {{ "{:,.0f}".format(room.GiaMoiDem) }} đ/đêm</div>
+            </div>
+            <div>
+              {% set st = room.TrangThai %}
+              {% if st == 'Trống' %}
+                <span class="status-badge badge-trong matrix-badge" data-room-badge="{{ room.MaPhong }}">Trống</span>
+              {% elif st == 'Đã giữ' %}
+                <span class="status-badge badge-da-giu matrix-badge" data-room-badge="{{ room.MaPhong }}">Đã giữ</span>
+              {% elif st == 'Đang ở' %}
+                <span class="status-badge badge-dang-o matrix-badge" data-room-badge="{{ room.MaPhong }}">Đang ở</span>
+              {% elif st == 'Cần dọn dẹp' %}
+                <span class="status-badge badge-can-don matrix-badge" data-room-badge="{{ room.MaPhong }}">Cần dọn dẹp</span>
+              {% else %}
+                <span class="status-badge badge-bao-tri matrix-badge" data-room-badge="{{ room.MaPhong }}">{{ st }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px dashed rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              {% if room.KhachHangHienTai and room.TrangThai in ['Đã giữ', 'Đang ở'] %}
+                Khách: <strong style="color: var(--gold);">{{ room.KhachHangHienTai }}</strong>
+              {% else %}
+                <span>Sẵn sàng đón khách</span>
+              {% endif %}
+            </div>
+
+            {% if room.TrangThai == 'Cần dọn dẹp' %}
+              <form method="POST" action="/receptionist/rooms/{{ room.MaPhong }}/clean">
+                <button type="submit" class="btn btn-sm btn-primary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">
+                  <i class="fa-solid fa-check"></i> Đã Dọn Xong
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- PHẦN 2: HÀNG ĐỢI ĐƠN ĐẶT PHÒNG TỪ KHÁCH HÀNG (LIVE BOOKINGS) -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+      <h2 style="font-family: var(--font-heading); color: #ffffff; font-size: 1.4rem;">
+        <i class="fa-solid fa-list-check" style="color: var(--gold);"></i> Hàng Đợi Tiếp Nhận & Xử Lý Đơn Đặt Phòng
+      </h2>
+      <span style="font-size: 0.85rem; color: var(--text-muted);">Nhận đơn tự động tức thời khi khách bấm Đặt phòng</span>
+    </div>
+
+    {% if bookings | length == 0 %}
+      <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+        Chưa có đơn đặt phòng nào trong hệ thống.
+      </div>
+    {% else %}
+      <div style="overflow-x: auto;">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Mã Đơn</th>
+              <th>Phòng</th>
+              <th>Khách Hàng</th>
+              <th>Thời Gian Ở</th>
+              <th>Tổng Tiền</th>
+              <th>Trạng Thái Đơn</th>
+              <th>Thao Tác Nghiệp Vụ Lễ Tân</th>
+            </tr>
+          </thead>
+          <tbody id="receptionistBookingTableBody">
+            {% for b in bookings %}
+              <tr id="booking-row-{{ b.MaDatPhong }}">
+                <td><strong style="color: var(--gold);">#{{ b.MaDatPhong }}</strong></td>
+                <td>
+                  <span class="room-number">P.{{ b.SoPhong or b.MaPhong }}</span><br>
+                  <small style="color: var(--text-muted);">{{ b.TenLoaiPhong }}</small>
+                </td>
+                <td>
+                  <strong>{{ b.TenKhachHang }}</strong><br>
+                  <small style="color: var(--text-muted);"><i class="fa-solid fa-phone"></i> {{ b.SoDienThoai }}</small>
+                </td>
+                <td>
+                  {{ b.NgayNhan }} ➔ {{ b.NgayTra }}<br>
+                  <small style="color: var(--text-muted);">({{ b.SoDem or 1 }} đêm)</small>
+                </td>
+                <td>
+                  <strong style="color: var(--gold);">{{ "{:,.0f}".format(b.TongTien | float) }} đ</strong>
+                </td>
+                <td>
+                  {% set st = b.TrangThai %}
+                  {% if st == 'Chờ xác nhận' %}
+                    <span class="status-badge badge-da-giu">{{ st }}</span>
+                  {% elif st == 'Đã xác nhận' %}
+                    <span class="status-badge badge-da-giu">{{ st }}</span>
+                  {% elif st == 'Đang ở' %}
+                    <span class="status-badge badge-dang-o">{{ st }}</span>
+                  {% elif st == 'Đã trả phòng' %}
+                    <span class="status-badge badge-can-don">{{ st }}</span>
+                  {% else %}
+                    <span class="status-badge badge-bao-tri">{{ st }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                    {% if b.TrangThai == 'Chờ xác nhận' %}
+                      <form method="POST" action="/receptionist/bookings/{{ b.MaDatPhong }}/action">
+                        <input type="hidden" name="action" value="confirm">
+                        <button type="submit" class="btn btn-sm btn-primary" title="Xác nhận đơn">
+                          <i class="fa-solid fa-check"></i> Duyệt Đơn
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    {% if b.TrangThai in ['Chờ xác nhận', 'Đã xác nhận'] %}
+                      <form method="POST" action="/receptionist/bookings/{{ b.MaDatPhong }}/action">
+                        <input type="hidden" name="action" value="checkin">
+                        <button type="submit" class="btn btn-sm btn-secondary" style="border-color: var(--blue); color: var(--blue);" title="Khách đến nhận phòng">
+                          <i class="fa-solid fa-key"></i> Check-in
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    {% if b.TrangThai == 'Đang ở' %}
+                      <form method="POST" action="/receptionist/bookings/{{ b.MaDatPhong }}/action">
+                        <input type="hidden" name="action" value="checkout">
+                        <button type="submit" class="btn btn-sm btn-secondary" style="border-color: var(--purple); color: var(--purple);" title="Khách trả phòng">
+                          <i class="fa-solid fa-receipt"></i> Check-out
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    {% if b.TrangThai not in ['Đã trả phòng', 'Đã hủy'] %}
+                      <form method="POST" action="/receptionist/bookings/{{ b.MaDatPhong }}/action" onsubmit="return confirm('Bạn có chắc muốn hủy đơn đặt phòng này?');">
+                        <input type="hidden" name="action" value="cancel">
+                        <button type="submit" class="btn btn-sm btn-secondary" style="color: var(--rose);" title="Hủy đơn">
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables (BẢO MẬT: KHÔNG ĐƯA KHÓA AWS LÊN GITHUB)
+.env
+.env.local
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Pytest / Testing
+.pytest_cache/
+
+# IDE configs
+.vscode/
+.idea/
+
+# Dữ liệu sao lưu cục bộ
+backups/*.json
