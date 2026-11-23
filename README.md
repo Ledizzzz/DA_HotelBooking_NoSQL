@@ -1,58 +1,34 @@
 # 🏨 Saigon Grand Luxury Hotel - Realtime Booking System
-> **Đồ án môn học: Cơ Sở Dữ Liệu NoSQL (Amazon DynamoDB)**  
-> **Kiến trúc:** Single-Table Design · Fast API (Python 3.11) · WebSockets · Boto3
+> **Đồ án môn học:** Cơ Sở Dữ Liệu NoSQL (Trường Đại học Công Thương TP.HCM - HUIT)  
+> **Kiến trúc:** Amazon DynamoDB (Single-Table Design) · Python 3.11 (FastAPI + Boto3) · WebSockets
 
 ---
 
-## 🌟 Tính Năng Nổi Bật
+## 🌟 Chi Tiết Hướng Dẫn Cài Đặt & Khởi Chạy
 
-1. **Phân quyền 3 vai trò (RBAC)**:
-   - **Khách hàng (Customer)**: Xem danh sách phòng kèm ảnh chụp thực tế 5 sao, bộ lọc tìm kiếm theo giá/số khách, đặt phòng trực tuyến, theo dõi lịch sử đơn đặt.
-   - **Lễ tân (Receptionist)**: Ma trận phòng thời gian thực (đổi màu tự động qua WebSocket), tiếp nhận đơn khách đặt, quy trình Check-in ➔ Check-out ➔ Dọn phòng.
-   - **Quản trị viên (Admin)**: Toàn quyền quản lý phòng (thêm/sửa/xóa, tải ảnh thật trực tiếp từ máy lên), quản lý nhân viên, xuất dữ liệu Sao lưu (Backup) DynamoDB ra JSON.
+Toàn bộ hướng dẫn chi tiết cách cài đặt thư viện, cấu hình môi trường, khởi chạy ứng dụng 1 lệnh, danh sách tài khoản demo và bảng tổng hợp các hàm truy vấn DynamoDB đã được hợp nhất đầy đủ tại:
 
-2. **Cơ sở dữ liệu Amazon DynamoDB Chuẩn**:
-   - Kiến trúc **Single-Table Design** với cặp khóa chính `PK` (Partition Key) và `SK` (Sort Key).
-   - Tối ưu hóa đọc dữ liệu bằng **`Query` + `begins_with`** (không dùng `Scan`, tiết kiệm chi phí RCU).
-   - Truy vấn nâng cao trên **Global Secondary Index (GSI1)** để lấy lịch sử đơn theo từng khách hàng.
-   - Giao dịch đồng thời **`TransactWriteItems` (ACID)** chống Overbooking (đặt trùng phòng) khi có nhiều người đặt cùng thời điểm.
-
-3. **Công nghệ Sử Dụng**:
-   - **Backend**: Python 3.11, FastAPI, Uvicorn, Boto3, WebSockets, Bcrypt.
-   - **Frontend**: Jinja2 Templates, Luxury Dark & Gold Design, Vanilla JavaScript ES6.
-   - **Tài liệu API tự động**: Swagger UI (`/docs`).
+👉 **[HUONG_DAN_CHAY.md](HUONG_DAN_CHAY.md)**
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt & Chạy
+## ⚡ Tóm Tắt Nhanh Các Bước Khởi Chạy
 
-### 1. Cài đặt thư viện:
-```bash
-pip install -r requirements.txt
-```
+1. **Cài đặt thư viện:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### 2. Cấu hình biến môi trường:
-Tạo file `.env` từ file mẫu `.env.example` và điền thông tin AWS:
-```env
-PORT=8000
-SECRET_KEY=hotel-booking-secret-2026
-AWS_REGION=ap-southeast-1
-DYNAMODB_TABLE=HotelBooking
-AWS_ACCESS_KEY_ID=AKIAxxxxxxxxxxxxxxxx
-AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
+2. **Khởi chạy máy chủ:**
+   ```bash
+   python run.py
+   ```
 
-### 3. Khởi chạy máy chủ:
-```bash
-python run.py
-```
+3. **Mở trình duyệt truy cập:**
+   * Giao diện Web: **http://localhost:8000**
+   * Tài liệu Swagger API: **http://localhost:8000/docs**
 
-* Mở trình duyệt web: **http://localhost:8000**
-* Tài liệu Swagger API: **http://localhost:8000/docs**
-
----
-
-## 🔑 Tài Khoản Mẫu (Đã tích hợp nút Điền Nhanh 1-click):
-- **Admin**: `admin` / `admin123`
-- **Lễ tân**: `letan` / `letan123`
-- **Khách hàng**: `khachhang` / `khach123`
+4. **Tài khoản Demo (Có nút Điền Nhanh 1-Click trên giao diện):**
+   * **Admin:** `admin` / `admin123`
+   * **Lễ tân:** `letan` / `letan123`
+   * **Khách hàng:** `khachhang` / `khach123`
