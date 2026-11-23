@@ -17,12 +17,12 @@
       <label for="room_type"><i class="fa-solid fa-layer-group"></i> Hạng Phòng</label>
       <select id="room_type" name="room_type" class="form-control">
         <option value="All" {% if room_type == 'All' or not room_type %}selected{% endif %}>Tất cả các hạng phòng</option>
-        <option value="Phòng Tiêu Chuẩn (Standard Double)" {% if room_type == 'Phòng Tiêu Chuẩn (Standard Double)' %}selected{% endif %}>Standard Double</option>
-        <option value="Phòng Tiêu Chuẩn 2 Giường (Twin Standard)" {% if room_type == 'Phòng Tiêu Chuẩn 2 Giường (Twin Standard)' %}selected{% endif %}>Twin Standard</option>
-        <option value="Phòng Cao Cấp Ban Công (Deluxe City View)" {% if room_type == 'Phòng Cao Cấp Ban Công (Deluxe City View)' %}selected{% endif %}>Deluxe City View</option>
-        <option value="Phòng Sang Trọng Hướng Vườn (Deluxe Garden Suite)" {% if room_type == 'Phòng Sang Trọng Hướng Vườn (Deluxe Garden Suite)' %}selected{% endif %}>Deluxe Garden Suite</option>
-        <option value="Phòng Suite Gia Đình Hạng Sang (Executive Family Suite)" {% if room_type == 'Phòng Suite Gia Đình Hạng Sang (Executive Family Suite)' %}selected{% endif %}>Executive Family Suite</option>
-        <option value="Biệt Thự Tổng Thống Toàn Cảnh (Presidential Panoramic Penthouse)" {% if room_type == 'Biệt Thự Tổng Thống Toàn Cảnh (Presidential Panoramic Penthouse)' %}selected{% endif %}>Presidential Penthouse</option>
+        <option value="Phòng Tiêu Chuẩn (Standard Double)" {% if room_type == 'Phòng Tiêu Chuẩn (Standard Double)' %}selected{% endif %}>Phòng Tiêu Chuẩn (Giường Đôi)</option>
+        <option value="Phòng Tiêu Chuẩn 2 Giường (Twin Standard)" {% if room_type == 'Phòng Tiêu Chuẩn 2 Giường (Twin Standard)' %}selected{% endif %}>Phòng Tiêu Chuẩn (2 Giường Đơn)</option>
+        <option value="Phòng Cao Cấp Ban Công (Deluxe City View)" {% if room_type == 'Phòng Cao Cấp Ban Công (Deluxe City View)' %}selected{% endif %}>Phòng Cao Cấp Ban Công (View Phố)</option>
+        <option value="Phòng Sang Trọng Hướng Vườn (Deluxe Garden Suite)" {% if room_type == 'Phòng Sang Trọng Hướng Vườn (Deluxe Garden Suite)' %}selected{% endif %}>Phòng Sang Trọng (Hướng Vườn)</option>
+        <option value="Phòng Suite Gia Đình Hạng Sang (Executive Family Suite)" {% if room_type == 'Phòng Suite Gia Đình Hạng Sang (Executive Family Suite)' %}selected{% endif %}>Phòng Suite Gia Đình (Hạng Sang)</option>
+        <option value="Biệt Thự Tổng Thống Toàn Cảnh (Presidential Panoramic Penthouse)" {% if room_type == 'Biệt Thự Tổng Thống Toàn Cảnh (Presidential Panoramic Penthouse)' %}selected{% endif %}>Biệt Thự Tổng Thống (Toàn Cảnh)</option>
       </select>
     </div>
 
@@ -72,7 +72,7 @@
   <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
     <div>
       <h2 class="section-title">Danh Mục Phòng Nghỉ</h2>
-      <p class="section-sub">Hiển thị dữ liệu thực tế từ bảng DynamoDB (Truy vấn phân vùng Single-Table)</p>
+      <p class="section-sub">Hiển thị dữ liệu thực tế từ bảng DynamoDB</p>
     </div>
     <div style="color: var(--text-muted); font-size: 0.9rem;">
       Tìm thấy <strong style="color: var(--gold);">{{ rooms | length }}</strong> phòng sẵn có

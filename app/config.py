@@ -17,6 +17,7 @@ class Settings:
     DYNAMODB_TABLE: str = os.getenv("DYNAMODB_TABLE", "HotelBooking")
     AWS_ACCESS_KEY_ID: str = os.getenv("AWS_ACCESS_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+    AWS_SESSION_TOKEN: str = os.getenv("AWS_SESSION_TOKEN", "")
 
     # Thư mục lưu trữ ảnh tải lên
     UPLOAD_DIR: Path = BASE_DIR / "app" / "static" / "uploads"

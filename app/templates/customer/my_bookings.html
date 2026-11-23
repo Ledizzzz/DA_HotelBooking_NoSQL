@@ -6,13 +6,35 @@
 <div class="container" style="padding-top: 2.5rem;">
   <div style="margin-bottom: 2rem;">
     <h1 class="section-title"><i class="fa-solid fa-receipt" style="color: var(--gold);"></i> Đơn Đặt Phòng Của Tôi</h1>
-    <p class="section-sub">Truy vấn nhanh chóng qua Chỉ mục phụ <strong>Global Secondary Index (GSI1)</strong> trên Amazon DynamoDB</p>
+    <p class="section-sub">Truy vấn nhanh chóng qua Chỉ mục phụ <strong>Global Secondary Index </strong> trên Amazon DynamoDB</p>
   </div>
 
   {% if msg %}
-    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--emerald); color: #6ee7b7; padding: 1rem 1.4rem; border-radius: var(--radius-sm); margin-bottom: 2rem;">
-      <i class="fa-solid fa-circle-check"></i> {{ msg }}
+    <div id="alertMsg" style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--emerald); color: #6ee7b7; padding: 0.85rem 1.4rem; border-radius: var(--radius-sm); margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15); transition: all 0.5s ease; overflow: hidden;">
+      <div style="display: flex; align-items: center; gap: 0.65rem; font-weight: 500;">
+        <i class="fa-solid fa-circle-check" style="font-size: 1.15rem; color: var(--emerald);"></i>
+        <span>{{ msg }}</span>
+      </div>
+      <button type="button" onclick="dismissAlert()" style="background: transparent; border: none; color: #6ee7b7; cursor: pointer; font-size: 1.3rem; line-height: 1; padding: 0 0.3rem;" title="Đóng">&times;</button>
     </div>
+    <script>
+      function dismissAlert() {
+        const el = document.getElementById('alertMsg');
+        if (el) {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(-10px)';
+          el.style.maxHeight = '0';
+          el.style.marginBottom = '0';
+          el.style.paddingTop = '0';
+          el.style.paddingBottom = '0';
+          setTimeout(() => el.remove(), 500);
+        }
+      }
+      setTimeout(dismissAlert, 3000);
+      if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.pathname);
+      }
+    </script>
   {% endif %}
 
   {% if bookings | length == 0 %}
@@ -34,6 +56,7 @@
             <th>Tổng Tiền</th>
             <th>Ngày Đặt</th>
             <th>Trạng Thái</th>
+            <th>Thao Tác</th>
           </tr>
         </thead>
         <tbody>
@@ -69,6 +92,17 @@
                   <span class="status-badge badge-can-don">{{ st }}</span>
                 {% else %}
                   <span class="status-badge badge-bao-tri">{{ st }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if b.TrangThai == 'Chờ xác nhận' %}
+                  <form method="POST" action="/my-bookings/{{ b.MaDatPhong }}/cancel" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn đặt phòng này không?');">
+                    <button type="submit" class="btn btn-sm" style="background: rgba(244, 63, 94, 0.15); border: 1px solid var(--rose); color: var(--rose);">
+                      <i class="fa-solid fa-xmark"></i> Hủy Đơn
+                    </button>
+                  </form>
+                {% else %}
+                  <span style="color: var(--text-muted); font-size: 0.85rem;">-</span>
                 {% endif %}
               </td>
             </tr>

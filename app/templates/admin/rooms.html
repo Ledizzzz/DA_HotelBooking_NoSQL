@@ -102,35 +102,42 @@
       <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem;">
         <div class="filter-group">
           <label for="roomNumber">Số Phòng</label>
-          <input type="text" id="roomNumber" name="room_number" required class="form-control" placeholder="Ví dụ: 101">
+          <input type="number" id="roomNumber" name="room_number" required class="form-control" placeholder="" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
         </div>
         <div class="filter-group">
           <label for="roomType">Hạng Phòng</label>
-          <input type="text" id="roomType" name="room_type" required class="form-control" placeholder="Phòng Tiêu Chuẩn, Deluxe, Suite...">
+          <select id="roomType" name="room_type" required class="form-control">
+            <option value="Phòng Tiêu Chuẩn (Standard Double)">Phòng Tiêu Chuẩn (Giường Đôi)</option>
+            <option value="Phòng Tiêu Chuẩn 2 Giường (Twin Standard)">Phòng Tiêu Chuẩn (2 Giường Đơn)</option>
+            <option value="Phòng Cao Cấp Ban Công (Deluxe City View)">Phòng Cao Cấp Ban Công (View Phố)</option>
+            <option value="Phòng Sang Trọng Hướng Vườn (Deluxe Garden Suite)">Phòng Sang Trọng (Hướng Vườn)</option>
+            <option value="Phòng Suite Gia Đình Hạng Sang (Executive Family Suite)">Phòng Suite Gia Đình (Hạng Sang)</option>
+            <option value="Biệt Thự Tổng Thống Toàn Cảnh (Presidential Panoramic Penthouse)">Biệt Thự Tổng Thống (Toàn Cảnh)</option>
+          </select>
         </div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
         <div class="filter-group">
           <label for="roomPrice">Giá / Đêm (VNĐ)</label>
-          <input type="number" id="roomPrice" name="price" required class="form-control" placeholder="850000">
+          <input type="number" id="roomPrice" name="price" required class="form-control" placeholder="850000" min="10000" step="1000">
         </div>
         <div class="filter-group">
           <label for="roomFloor">Tầng</label>
-          <input type="number" id="roomFloor" name="floor" required class="form-control" placeholder="1" min="1">
+          <input type="number" id="roomFloor" name="floor" required class="form-control" placeholder="1" min="1" max="30">
         </div>
         <div class="filter-group">
           <label for="roomMaxGuests">Sức Chứa</label>
-          <input type="number" id="roomMaxGuests" name="max_guests" required class="form-control" placeholder="2" min="1">
+          <input type="number" id="roomMaxGuests" name="max_guests" required class="form-control" placeholder="2" min="1" max="10">
         </div>
       </div>
 
       <div class="filter-group">
         <label for="roomStatus">Trạng Thái Phòng</label>
         <select id="roomStatus" name="status_room" class="form-control">
-          <option value="Trống">Trống (Sẵn sàng)</option>
-          <option value="Đã giữ">Đã giữ (Khách đã đặt)</option>
-          <option value="Đang ở">Đang ở (Khách đang lưu trú)</option>
+          <option value="Trống">Phòng Trống</option>
+          <option value="Đã giữ">Khách Đã Đặt</option>
+          <option value="Đang ở">Khách Đang ở</option>
           <option value="Cần dọn dẹp">Cần dọn dẹp</option>
           <option value="Bảo trì">Đang bảo trì</option>
         </select>
@@ -151,7 +158,7 @@
       </div>
 
       <div class="filter-group">
-        <label for="roomAmenities">Tiện Ích Đi Kèm (Cách nhau bởi dấu phẩy)</label>
+        <label for="roomAmenities">Tiện Ích Đi Kèm</label>
         <input type="text" id="roomAmenities" name="amenities" class="form-control" placeholder="Wifi 5G, Smart TV, Điều hòa, Bồn tắm...">
       </div>
 
@@ -177,7 +184,7 @@
     document.getElementById('roomModalTitle').innerHTML = '<i class="fa-solid fa-bed"></i> Thêm Phòng Nghỉ Mới';
     document.getElementById('roomNumber').value = '';
     document.getElementById('roomNumber').readOnly = false;
-    document.getElementById('roomType').value = '';
+    document.getElementById('roomType').selectedIndex = 0;
     document.getElementById('roomPrice').value = '';
     document.getElementById('roomFloor').value = '1';
     document.getElementById('roomMaxGuests').value = '2';
@@ -192,7 +199,18 @@
     document.getElementById('roomModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Cập Nhật Phòng ${number}`;
     document.getElementById('roomNumber').value = number;
     document.getElementById('roomNumber').readOnly = true;
-    document.getElementById('roomType').value = type;
+
+    const roomTypeSelect = document.getElementById('roomType');
+    roomTypeSelect.value = type;
+    if (!roomTypeSelect.value) {
+      for (let opt of roomTypeSelect.options) {
+        if (opt.text === type || opt.value.includes(type) || type.includes(opt.value)) {
+          roomTypeSelect.value = opt.value;
+          break;
+        }
+      }
+    }
+
     document.getElementById('roomPrice').value = price;
     document.getElementById('roomFloor').value = floor;
     document.getElementById('roomMaxGuests').value = guests;

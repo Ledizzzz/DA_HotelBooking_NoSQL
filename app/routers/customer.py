@@ -159,3 +159,46 @@ async def my_bookings_page(request: Request, msg: str = ""):
             "msg": msg
         }
     )
+
+
+@router.post("/my-bookings/{booking_id}/cancel")
+async def customer_cancel_booking(request: Request, booking_id: str):
+    """Khách hàng tự hủy đơn đặt phòng khi đơn đang ở trạng thái 'Chờ xác nhận'"""
+    current_user = get_current_user(request)
+    if not current_user:
+        return RedirectResponse("/login", status_code=status.HTTP_302_FOUND)
+
+    from app.database.queries import update_booking_status, update_room_status, get_room
+    from app.database.dynamo import hotel_table
+
+    res = hotel_table.get_item(Key={"PK": "HOTEL#H01", "SK": f"BOOKING#{booking_id}"})
+    booking = res.get("Item")
+    if not booking or booking.get("NguoiDat") != current_user["username"]:
+        return RedirectResponse("/my-bookings?error=Don dat phong khong hop le", status_code=status.HTTP_302_FOUND)
+
+    if booking.get("TrangThai") != "Chờ xác nhận":
+        return RedirectResponse("/my-bookings?error=Chi co the huy don khi dang Cho xac nhan", status_code=status.HTTP_302_FOUND)
+
+    # Cập nhật đơn sang Đã hủy
+    update_booking_status(booking_id, "Đã hủy")
+
+    # Trả phòng về Trống
+    room_id = booking.get("MaPhong")
+    if room_id:
+        update_room_status(room_id, "Trống")
+        await ws_manager.broadcast({
+            "type": "room_updated",
+            "room_id": room_id,
+            "new_status": "Trống"
+        })
+
+    await ws_manager.broadcast({
+        "type": "booking_status_changed",
+        "booking_id": booking_id,
+        "new_status": "Đã hủy"
+    })
+
+    return RedirectResponse(
+        "/my-bookings?msg=Da huy don dat phong thanh cong! Phong da duoc tra ve trang thai Trong.",
+        status_code=status.HTTP_302_FOUND
+    )

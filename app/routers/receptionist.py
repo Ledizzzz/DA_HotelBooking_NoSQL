@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Form, status, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
+import urllib.parse
 from app.database.queries import (
     list_all_rooms,
     list_all_bookings,
@@ -30,14 +31,30 @@ async def receptionist_dashboard(request: Request, msg: str = ""):
     rooms = list_all_rooms()
     bookings = list_all_bookings()
 
-    # Thống kê nhanh trạng thái phòng
+    # Thống kê nhanh trạng thái phòng, tỷ lệ lấp đầy & tổng doanh thu
+    total_rooms = len(rooms)
+    occupied_count = sum(1 for r in rooms if r.get("TrangThai") == "Đang ở")
+    reserved_count = sum(1 for r in rooms if r.get("TrangThai") == "Đã giữ")
+    available_count = sum(1 for r in rooms if r.get("TrangThai") == "Trống")
+    cleaning_count = sum(1 for r in rooms if r.get("TrangThai") == "Cần dọn dẹp")
+    maintenance_count = sum(1 for r in rooms if r.get("TrangThai") == "Bảo trì")
+
+    # Tỷ lệ lấp đầy phòng (%)
+    occupancy_rate = round(((occupied_count + reserved_count) / total_rooms * 100), 1) if total_rooms > 0 else 0
+
+    # Tổng doanh thu từ các đơn đặt phòng (không tính đơn Đã hủy)
+    valid_statuses = ["Chờ xác nhận", "Đã xác nhận", "Đang ở", "Đã trả phòng"]
+    total_revenue = sum(float(b.get("TongTien", 0)) for b in bookings if b.get("TrangThai") in valid_statuses)
+
     stats = {
-        "total": len(rooms),
-        "available": sum(1 for r in rooms if r.get("TrangThai") == "Trống"),
-        "reserved": sum(1 for r in rooms if r.get("TrangThai") == "Đã giữ"),
-        "occupied": sum(1 for r in rooms if r.get("TrangThai") == "Đang ở"),
-        "cleaning": sum(1 for r in rooms if r.get("TrangThai") == "Cần dọn dẹp"),
-        "maintenance": sum(1 for r in rooms if r.get("TrangThai") == "Bảo trì")
+        "total": total_rooms,
+        "available": available_count,
+        "reserved": reserved_count,
+        "occupied": occupied_count,
+        "cleaning": cleaning_count,
+        "maintenance": maintenance_count,
+        "occupancy_rate": occupancy_rate,
+        "total_revenue": total_revenue
     }
 
     return templates.TemplateResponse(
@@ -99,8 +116,10 @@ async def handle_booking_action(
             "new_status": room_status
         })
 
+    msg_text = f"Đã cập nhật đơn #{booking_id} thành '{new_status}'!"
+    encoded_msg = urllib.parse.quote(msg_text)
     return RedirectResponse(
-        url=f"/receptionist?msg=Da cap nhat don #{booking_id} thanh '{new_status}'!",
+        url=f"/receptionist?msg={encoded_msg}",
         status_code=status.HTTP_302_FOUND
     )
 
@@ -119,7 +138,9 @@ async def mark_room_cleaned(request: Request, room_id: str):
         "new_status": "Trống"
     })
 
+    msg_text = f"Phòng {room_id} đã dọn dẹp xong và sẵn sàng đón khách!"
+    encoded_msg = urllib.parse.quote(msg_text)
     return RedirectResponse(
-        url=f"/receptionist?msg=Phong {room_id} da don dep xong va san sang don khach!",
+        url=f"/receptionist?msg={encoded_msg}",
         status_code=status.HTTP_302_FOUND
     )

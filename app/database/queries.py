@@ -149,6 +149,58 @@ def create_user(data: dict) -> dict:
     return item
 
 
+def update_user_profile(username: str, data: dict) -> bool:
+    """
+    [Truy vấn cập nhật thông tin người dùng - UpdateItem]
+    Cập nhật Họ tên, Vai trò, Số điện thoại, Email và Mật khẩu (nếu đổi).
+    """
+    clean_user = username.strip().lower()
+    update_expr = "SET HoTen = :n, VaiTro = :r, SoDienThoai = :p, Email = :e, NgayCapNhat = :u"
+    expr_vals = {
+        ":n": data.get("name", clean_user).strip(),
+        ":r": data.get("role", "customer"),
+        ":p": data.get("phone", "").strip(),
+        ":e": data.get("email", "").strip(),
+        ":u": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    if data.get("password_hash"):
+        update_expr += ", MatKhauHash = :pw"
+        expr_vals[":pw"] = data["password_hash"]
+
+    try:
+        hotel_table.update_item(
+            Key={
+                "PK": f"USER#{clean_user}",
+                "SK": "PROFILE"
+            },
+            UpdateExpression=update_expr,
+            ExpressionAttributeValues=expr_vals
+        )
+        return True
+    except ClientError as e:
+        print(f"Lỗi update_user_profile: {e.response['Error']['Message']}")
+        return False
+
+
+def delete_user_account(username: str) -> bool:
+    """
+    [Truy vấn xóa người dùng - DeleteItem]
+    Xóa tài khoản người dùng khỏi bảng DynamoDB dựa trên PK=USER#{username}, SK=PROFILE.
+    """
+    clean_user = username.strip().lower()
+    try:
+        hotel_table.delete_item(
+            Key={
+                "PK": f"USER#{clean_user}",
+                "SK": "PROFILE"
+            }
+        )
+        return True
+    except ClientError as e:
+        print(f"Lỗi delete_user_account: {e.response['Error']['Message']}")
+        return False
+
+
 # ===============================================================================
 # 2. CÁC TRUY VẤN NÂNG CAO (ADVANCED QUERIES - MỤC 5 & 7 TRONG THANG ĐIỂM)
 # ===============================================================================

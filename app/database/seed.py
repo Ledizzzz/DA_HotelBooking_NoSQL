@@ -10,7 +10,7 @@ SCRIPT NẠP DỮ LIỆU MẪU BAN ĐẦU (SEED DATA) CHO BẢNG HOTELBOOKING
 import sys
 from decimal import Decimal
 from app.services.security import hash_password
-from app.database.dynamo import hotel_table
+from app.database.dynamo import hotel_table, create_table_if_not_exists
 from app.database.queries import (
     HOTEL_DEFAULT_PK,
     get_room,
@@ -132,6 +132,7 @@ USERS_DATA = [
 def seed_database_if_empty():
     """Tự động kiểm tra và nạp dữ liệu mẫu ban đầu nếu bảng chưa có phòng hoặc tài khoản"""
     print("\n[SEED] Đang kiểm tra dữ liệu bảng HotelBooking...")
+    create_table_if_not_exists()
 
     # 1. Nạp metadata khách sạn
     try:

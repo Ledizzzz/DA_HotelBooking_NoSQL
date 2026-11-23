@@ -3,10 +3,46 @@
 {% block title %}Bảng Điều Khiển Lễ Tân · Saigon Grand Luxury Hotel{% endblock %}
 
 {% block content %}
+<style>
+  .receptionist-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+    margin-bottom: 2.5rem;
+  }
+  @media (max-width: 900px) {
+    .receptionist-stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 560px) {
+    .receptionist-stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .filter-pill {
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .filter-pill:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+  .filter-pill.active {
+    background: var(--gold) !important;
+    color: #0b1329 !important;
+    border-color: var(--gold) !important;
+    font-weight: 700 !important;
+  }
+</style>
+
 <div class="container" style="padding-top: 2.5rem;">
   <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
     <div>
-      <h1 class="section-title"><i class="fa-solid fa-bell-concierge" style="color: var(--gold);"></i> Bảng Điều Khiển Lễ Tân (Realtime)</h1>
+      <h1 class="section-title"><i class="fa-solid fa-bell-concierge" style="color: var(--gold);"></i> Bảng Điều Khiển Lễ Tân </h1>
       <p class="section-sub">Giám sát ma trận phòng và quy trình Check-in / Check-out thời gian thực qua WebSocket</p>
     </div>
     <div style="color: var(--text-muted); font-size: 0.9rem;">
@@ -15,50 +51,98 @@
   </div>
 
   {% if msg %}
-    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--emerald); color: #6ee7b7; padding: 1rem 1.4rem; border-radius: var(--radius-sm); margin-bottom: 2rem;">
-      <i class="fa-solid fa-circle-check"></i> {{ msg }}
+    <div id="alertMsg" style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--emerald); color: #6ee7b7; padding: 0.85rem 1.4rem; border-radius: var(--radius-sm); margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15); transition: all 0.5s ease; overflow: hidden;">
+      <div style="display: flex; align-items: center; gap: 0.65rem; font-weight: 500;">
+        <i class="fa-solid fa-circle-check" style="font-size: 1.15rem; color: var(--emerald);"></i>
+        <span>{{ msg }}</span>
+      </div>
+      <button type="button" onclick="dismissAlert()" style="background: transparent; border: none; color: #6ee7b7; cursor: pointer; font-size: 1.3rem; line-height: 1; padding: 0 0.3rem;" title="Đóng">&times;</button>
     </div>
+    <script>
+      function dismissAlert() {
+        const el = document.getElementById('alertMsg');
+        if (el) {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(-10px)';
+          el.style.maxHeight = '0';
+          el.style.marginBottom = '0';
+          el.style.paddingTop = '0';
+          el.style.paddingBottom = '0';
+          setTimeout(() => el.remove(), 500);
+        }
+      }
+      // Tự động tắt sau 3 giây (3000ms)
+      setTimeout(dismissAlert, 3000);
+      // Xóa query param msg trên thanh URL để F5 không hiện lại
+      if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.pathname);
+      }
+    </script>
   {% endif %}
 
-  <!-- THẺ THỐNG KÊ NHANH TÌNH TRẠNG PHÒNG -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem;">
-    <div style="background: var(--bg-card); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem;">
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--emerald); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+  <!-- THẺ THỐNG KÊ NHANH TÌNH TRẠNG PHÒNG (LƯỚI 3x2 CÂN ĐỐI) -->
+  <div class="receptionist-stats-grid">
+    <div style="background: var(--bg-card); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 1.2rem; box-shadow: var(--shadow-card);">
+      <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--emerald); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
         <i class="fa-solid fa-door-open"></i>
       </div>
       <div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ stats.available }}</div>
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--emerald); font-weight: 700;">Phòng Trống Sẵn Sàng</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; line-height: 1.2;">{{ stats.available }}</div>
+        <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--emerald); font-weight: 700; margin-top: 0.25rem;">Phòng Trống Sẵn Sàng</div>
       </div>
     </div>
 
-    <div style="background: var(--bg-card); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem;">
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); color: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+    <div style="background: var(--bg-card); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 1.2rem; box-shadow: var(--shadow-card);">
+      <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); color: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
         <i class="fa-solid fa-clock"></i>
       </div>
       <div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ stats.reserved }}</div>
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--amber); font-weight: 700;">Đã Giữ / Chờ Nhận</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; line-height: 1.2;">{{ stats.reserved }}</div>
+        <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--amber); font-weight: 700; margin-top: 0.25rem;">Đã Giữ / Chờ Nhận</div>
       </div>
     </div>
 
-    <div style="background: var(--bg-card); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem;">
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+    <div style="background: var(--bg-card); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 1.2rem; box-shadow: var(--shadow-card);">
+      <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
         <i class="fa-solid fa-users"></i>
       </div>
       <div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ stats.occupied }}</div>
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--blue); font-weight: 700;">Đang Có Khách Ở</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; line-height: 1.2;">{{ stats.occupied }}</div>
+        <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--blue); font-weight: 700; margin-top: 0.25rem;">Đang Có Khách Ở</div>
       </div>
     </div>
 
-    <div style="background: var(--bg-card); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.2rem;">
-      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(168, 85, 247, 0.15); color: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+    <div style="background: var(--bg-card); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: var(--radius-md); padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 1.2rem; box-shadow: var(--shadow-card);">
+      <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: rgba(168, 85, 247, 0.15); color: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
         <i class="fa-solid fa-broom"></i>
       </div>
       <div>
-        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">{{ stats.cleaning }}</div>
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--purple); font-weight: 700;">Cần Dọn Dẹp Phòng</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #ffffff; line-height: 1.2;">{{ stats.cleaning }}</div>
+        <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--purple); font-weight: 700; margin-top: 0.25rem;">Cần Dọn Dẹp Phòng</div>
+      </div>
+    </div>
+
+    <!-- TỶ LỆ LẤP ĐẦY PHÒNG -->
+    <div style="background: var(--bg-card); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: var(--radius-md); padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 1.2rem; box-shadow: var(--shadow-card);">
+      <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: rgba(234, 179, 8, 0.15); color: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+        <i class="fa-solid fa-chart-pie"></i>
+      </div>
+      <div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: var(--gold); line-height: 1.2;">{{ stats.occupancy_rate }}%</div>
+        <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-top: 0.25rem;">Tỷ Lệ Lấp Đầy</div>
+      </div>
+    </div>
+
+    <!-- TỔNG DOANH THU ĐƠN PHÒNG -->
+    <div style="background: var(--bg-card); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: var(--radius-md); padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 1.2rem; box-shadow: var(--shadow-card);">
+      <div style="width: 48px; height: 48px; min-width: 48px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--emerald); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+        <i class="fa-solid fa-sack-dollar"></i>
+      </div>
+      <div>
+        <div style="font-size: 1.7rem; font-weight: 800; color: #ffffff; white-space: nowrap; line-height: 1.2;">
+          {{ "{:,.0f}".format(stats.total_revenue) }} <span style="font-size: 1.05rem; color: var(--emerald); font-weight: 700;">đ</span>
+        </div>
+        <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--emerald); font-weight: 700; margin-top: 0.25rem;">Doanh Thu Đặt Phòng</div>
       </div>
     </div>
   </div>
@@ -121,11 +205,33 @@
 
   <!-- PHẦN 2: HÀNG ĐỢI ĐƠN ĐẶT PHÒNG TỪ KHÁCH HÀNG (LIVE BOOKINGS) -->
   <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-      <h2 style="font-family: var(--font-heading); color: #ffffff; font-size: 1.4rem;">
-        <i class="fa-solid fa-list-check" style="color: var(--gold);"></i> Hàng Đợi Tiếp Nhận & Xử Lý Đơn Đặt Phòng
-      </h2>
-      <span style="font-size: 0.85rem; color: var(--text-muted);">Nhận đơn tự động tức thời khi khách bấm Đặt phòng</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); flex-wrap: wrap; gap: 0.8rem;">
+      <div>
+        <h2 style="font-family: var(--font-heading); color: #ffffff; font-size: 1.4rem;">
+          <i class="fa-solid fa-list-check" style="color: var(--gold);"></i> Hàng Đợi Tiếp Nhận và Xử Lý Đơn Đặt Phòng
+        </h2>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Nhận đơn tự động tức thời khi khách bấm Đặt phòng</span>
+      </div>
+    </div>
+
+    <!-- THANH TÌM KIẾM ĐƠN ĐẶT PHÒNG VÀ LỌC NHANH TRẠNG THÁI CHO LỄ TÂN -->
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+      <!-- Ô nhập tìm kiếm -->
+      <div style="position: relative; flex-grow: 1; max-width: 500px; min-width: 280px;">
+        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 0.95rem;"></i>
+        <input type="text" id="bookingSearchInput" class="form-control" placeholder="Tìm theo Mã đơn, Tên khách, SĐT, Số phòng" style="padding-left: 2.8rem; padding-right: 2.5rem; height: 42px; border-radius: var(--radius-sm);" oninput="filterBookingsLive()">
+        <button type="button" id="clearBookingSearchBtn" onclick="clearBookingSearch()" style="position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: none; font-size: 1.2rem; line-height: 1;" title="Xóa tìm kiếm">&times;</button>
+      </div>
+
+      <!-- Các nút lọc nhanh theo trạng thái -->
+      <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+        <span style="font-size: 0.8rem; color: var(--text-muted); margin-right: 0.2rem;"><i class="fa-solid fa-filter"></i> Lọc:</span>
+        <button type="button" class="btn btn-sm filter-pill active" onclick="filterByStatus('all', this)" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">Tất Cả</button>
+        <button type="button" class="btn btn-sm filter-pill" onclick="filterByStatus('Chờ xác nhận', this)" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">Chờ Duyệt</button>
+        <button type="button" class="btn btn-sm filter-pill" onclick="filterByStatus('Đã xác nhận', this)" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">Đã Duyệt</button>
+        <button type="button" class="btn btn-sm filter-pill" onclick="filterByStatus('Đang ở', this)" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">Đang Ở</button>
+        <button type="button" class="btn btn-sm filter-pill" onclick="filterByStatus('Đã trả phòng', this)" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 999px;">Đã Trả Phòng</button>
+      </div>
     </div>
 
     {% if bookings | length == 0 %}
@@ -148,7 +254,13 @@
           </thead>
           <tbody id="receptionistBookingTableBody">
             {% for b in bookings %}
-              <tr id="booking-row-{{ b.MaDatPhong }}">
+              <tr id="booking-row-{{ b.MaDatPhong }}" class="booking-row"
+                  data-id="{{ b.MaDatPhong }}"
+                  data-room="{{ b.SoPhong or b.MaPhong }}"
+                  data-roomtype="{{ b.TenLoaiPhong }}"
+                  data-name="{{ b.TenKhachHang }}"
+                  data-phone="{{ b.SoDienThoai }}"
+                  data-status="{{ b.TrangThai }}">
                 <td><strong style="color: var(--gold);">#{{ b.MaDatPhong }}</strong></td>
                 <td>
                   <span class="room-number">P.{{ b.SoPhong or b.MaPhong }}</span><br>
@@ -220,10 +332,77 @@
                 </td>
               </tr>
             {% endfor %}
+
+            <!-- DÒNG THÔNG BÁO KHI KHÔNG TÌM THẤY ĐƠN NÀO -->
+            <tr id="noBookingsFoundRow" style="display: none;">
+              <td colspan="7" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+                <i class="fa-solid fa-file-circle-xmark" style="font-size: 2.2rem; margin-bottom: 0.8rem; display: block; color: var(--text-muted);"></i>
+                <div style="font-size: 1rem; font-weight: 600; color: #ffffff;">Không tìm thấy đơn đặt phòng phù hợp</div>
+                <div style="font-size: 0.85rem; margin-top: 0.3rem;">Vui lòng kiểm tra lại mã đơn, tên khách hàng hoặc số điện thoại.</div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
     {% endif %}
   </div>
 </div>
+
+<script>
+  let currentStatusFilter = 'all';
+
+  function filterBookingsLive() {
+    const input = document.getElementById('bookingSearchInput');
+    if (!input) return;
+    const query = input.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.booking-row');
+    const clearBtn = document.getElementById('clearBookingSearchBtn');
+    const noResultRow = document.getElementById('noBookingsFoundRow');
+    let matchCount = 0;
+
+    if (clearBtn) {
+      clearBtn.style.display = query ? 'block' : 'none';
+    }
+
+    rows.forEach(row => {
+      const id = (row.dataset.id || '').toLowerCase();
+      const room = (row.dataset.room || '').toLowerCase();
+      const roomType = (row.dataset.roomtype || '').toLowerCase();
+      const name = (row.dataset.name || '').toLowerCase();
+      const phone = (row.dataset.phone || '').toLowerCase();
+      const status = (row.dataset.status || '').toLowerCase();
+
+      const combinedText = `#${id} ${id} p.${room} ${room} ${roomType} ${name} ${phone} ${status}`;
+      const matchesQuery = !query || combinedText.includes(query);
+      const matchesStatus = (currentStatusFilter === 'all' || row.dataset.status === currentStatusFilter);
+
+      if (matchesQuery && matchesStatus) {
+        row.style.display = '';
+        matchCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    if (noResultRow) {
+      noResultRow.style.display = (matchCount === 0) ? '' : 'none';
+    }
+  }
+
+  function filterByStatus(status, btn) {
+    currentStatusFilter = status;
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    filterBookingsLive();
+  }
+
+  function clearBookingSearch() {
+    const input = document.getElementById('bookingSearchInput');
+    if (input) {
+      input.value = '';
+      filterBookingsLive();
+      input.focus();
+    }
+  }
+</script>
 {% endblock %}

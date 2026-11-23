@@ -6,12 +6,12 @@
 <div class="container" style="padding-top: 2.5rem;">
   <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
     <div>
-      <h1 class="section-title"><i class="fa-solid fa-database" style="color: var(--gold);"></i> Sao Lưu Dữ Liệu (Backup DynamoDB)</h1>
+      <h1 class="section-title"><i class="fa-solid fa-database" style="color: var(--gold);"></i> Sao Lưu Dữ Liệu</h1>
       <p class="section-sub">Xuất toàn bộ cấu trúc bảng Single-Table Design ra tệp tin JSON phục vụ kiểm thử và nộp báo cáo đồ án</p>
     </div>
     <form method="POST" action="/admin/backup/export">
       <button type="submit" class="btn btn-primary">
-        <i class="fa-solid fa-cloud-arrow-down"></i> Tạo Bản Sao Lưu Mới (.JSON)
+        <i class="fa-solid fa-cloud-arrow-down"></i> Tạo Bản Sao Lưu Mới 
       </button>
     </form>
   </div>
@@ -30,22 +30,22 @@
     </div>
     <div>
       <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Khu Vực Máy Chủ AWS</div>
-      <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-top: 0.3rem;">{{ region }} (Singapore)</div>
+      <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-top: 0.3rem;">{{ region }} </div>
     </div>
     <div>
       <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Cặp Khóa Chính Phân Vùng</div>
-      <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-top: 0.3rem;">PK (Hash) + SK (Range)</div>
+      <div style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-top: 0.3rem;">PK  + SK </div>
     </div>
     <div>
       <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Chỉ Mục Phụ Đã Thiết Lập</div>
-      <div style="font-size: 1.25rem; font-weight: 800; color: var(--emerald); margin-top: 0.3rem;">GSI1 (GSI1_PK, GSI1_SK)</div>
+      <div style="font-size: 1.25rem; font-weight: 800; color: var(--emerald); margin-top: 0.3rem;">GSI1 </div>
     </div>
   </div>
 
   <!-- DANH SÁCH CÁC BẢN SAO LƯU -->
   <div style="background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-md); padding: 1.8rem;">
     <h3 style="font-family: var(--font-heading); color: #ffffff; font-size: 1.25rem; margin-bottom: 1.2rem;">
-      <i class="fa-solid fa-clock-rotate-left" style="color: var(--gold);"></i> Lịch Sử Các Tệp Sao Lưu (.JSON)
+      <i class="fa-solid fa-clock-rotate-left" style="color: var(--gold);"></i> Lịch Sử Các Tệp Sao Lưu 
     </h3>
 
     {% if backups | length == 0 %}
@@ -73,9 +73,16 @@
                 <td>{{ b.size_kb }} KB</td>
                 <td style="color: var(--text-muted);">{{ b.created_at }}</td>
                 <td>
-                  <a href="/admin/backup/download/{{ b.filename }}" class="btn btn-sm btn-primary">
-                    <i class="fa-solid fa-download"></i> Tải Về (.JSON)
-                  </a>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <a href="/admin/backup/download/{{ b.filename }}" class="btn btn-sm btn-primary">
+                      <i class="fa-solid fa-download"></i> Tải Về 
+                    </a>
+                    <form method="POST" action="/admin/backup/restore/{{ b.filename }}" onsubmit="return confirm('Bạn có chắc chắn muốn khôi phục dữ liệu từ tệp này vào DynamoDB?');" style="display: inline;">
+                      <button type="submit" class="btn btn-sm btn-secondary" style="border-color: var(--gold); color: var(--gold);">
+                        <i class="fa-solid fa-rotate-left"></i> Khôi Phục
+                      </button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             {% endfor %}

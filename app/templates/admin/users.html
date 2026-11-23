@@ -4,45 +4,86 @@
 
 {% block content %}
 <div class="container" style="padding-top: 2.5rem;">
-  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
-    <div>
-      <h1 class="section-title"><i class="fa-solid fa-users-gear" style="color: var(--gold);"></i> Quản Trị Người Dùng & Phân Quyền</h1>
-      <p class="section-sub">Phân quyền chặt chẽ 3 vai trò: Quản Trị Viên (Admin), Lễ Tân (Receptionist), Khách Hàng (Customer)</p>
+  <!-- TIÊU ĐỀ TRANG -->
+  <div style="margin-bottom: 2rem;">
+    <h1 class="section-title"><i class="fa-solid fa-users-gear" style="color: var(--gold);"></i> Quản Trị Người Dùng và Phân Quyền</h1>
+    <p class="section-sub">Phân quyền chặt chẽ 3 vai trò: Quản Trị Viên, Lễ Tân, Khách Hàng</p>
+  </div>
+
+  <!-- THANH TÌM KIẾM VÀ NÚT THAO TÁC -->
+  <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.8rem;">
+    <!-- Ô tìm kiếm tài khoản thời gian thực -->
+    <div style="position: relative; flex-grow: 1; max-width: 480px; min-width: 280px;">
+      <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 0.95rem;"></i>
+      <input type="text" id="userSearchInput" class="form-control" placeholder="Tìm kiếm tên đăng nhập, họ tên, email, SĐT, vai trò..." style="padding-left: 2.8rem; padding-right: 2.5rem; height: 42px; border-radius: var(--radius-sm);" oninput="filterUsersLive()" value="{{ search_query or '' }}">
+      <button type="button" id="clearSearchBtn" onclick="clearSearch()" style="position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer; display: none; font-size: 1.2rem; line-height: 1;" title="Xóa tìm kiếm">&times;</button>
     </div>
+
+    <!-- Nút thêm tài khoản mới -->
     <button type="button" class="btn btn-primary" onclick="openStaffModal()">
-      <i class="fa-solid fa-user-plus"></i> Thêm Nhân Viên Mới
+      <i class="fa-solid fa-user-plus"></i> Thêm Tài Khoản Mới
     </button>
   </div>
 
+  <!-- THÔNG BÁO FLASH MESSAGE -->
   {% if msg %}
-    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--emerald); color: #6ee7b7; padding: 1rem 1.4rem; border-radius: var(--radius-sm); margin-bottom: 2rem;">
-      <i class="fa-solid fa-circle-check"></i> {{ msg }}
+    <div id="alertSuccess" style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--emerald); color: #6ee7b7; padding: 0.85rem 1.4rem; border-radius: var(--radius-sm); margin-bottom: 1.8rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15); transition: all 0.5s ease;">
+      <div style="display: flex; align-items: center; gap: 0.65rem;">
+        <i class="fa-solid fa-circle-check" style="font-size: 1.15rem; color: var(--emerald);"></i>
+        <span>{{ msg }}</span>
+      </div>
+      <button type="button" onclick="document.getElementById('alertSuccess').remove()" style="background: transparent; border: none; color: #6ee7b7; cursor: pointer; font-size: 1.3rem; line-height: 1;">&times;</button>
     </div>
+    <script>
+      setTimeout(() => {
+        const el = document.getElementById('alertSuccess');
+        if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 500); }
+      }, 3500);
+      if (window.history.replaceState) { window.history.replaceState(null, null, window.location.pathname); }
+    </script>
   {% endif %}
 
   {% if error %}
-    <div style="background: rgba(244, 63, 94, 0.15); border: 1px solid var(--rose); color: #fda4af; padding: 1rem 1.4rem; border-radius: var(--radius-sm); margin-bottom: 2rem;">
-      <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+    <div id="alertError" style="background: rgba(244, 63, 94, 0.15); border: 1px solid var(--rose); color: #fda4af; padding: 0.85rem 1.4rem; border-radius: var(--radius-sm); margin-bottom: 1.8rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.15); transition: all 0.5s ease;">
+      <div style="display: flex; align-items: center; gap: 0.65rem;">
+        <i class="fa-solid fa-circle-exclamation" style="font-size: 1.15rem; color: var(--rose);"></i>
+        <span>{{ error }}</span>
+      </div>
+      <button type="button" onclick="document.getElementById('alertError').remove()" style="background: transparent; border: none; color: #fda4af; cursor: pointer; font-size: 1.3rem; line-height: 1;">&times;</button>
     </div>
+    <script>
+      setTimeout(() => {
+        const el = document.getElementById('alertError');
+        if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 500); }
+      }, 4000);
+      if (window.history.replaceState) { window.history.replaceState(null, null, window.location.pathname); }
+    </script>
   {% endif %}
 
-  <div style="overflow-x: auto;">
-    <table class="custom-table">
+  <!-- BẢNG DANH SÁCH NGƯỜI DÙNG -->
+  <div style="overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-card);">
+    <table class="custom-table" style="margin-bottom: 0;">
       <thead>
         <tr>
           <th>Tên Đăng Nhập</th>
           <th>Họ Và Tên</th>
-          <th>Vai Trò (Phân Quyền)</th>
+          <th>Vai Trò Phân Quyền</th>
           <th>Số Điện Thoại</th>
           <th>Email</th>
           <th>Ngày Đăng Ký</th>
+          <th style="text-align: center;">Thao Tác</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="userTableBody">
         {% for u in users %}
-          <tr>
+          <tr class="user-row" 
+              data-username="{{ u.TenDangNhap }}"
+              data-name="{{ u.HoTen }}"
+              data-role="{{ u.VaiTro }}"
+              data-phone="{{ u.SoDienThoai or '' }}"
+              data-email="{{ u.Email or '' }}">
             <td>
-              <strong style="color: var(--gold);">{{ u.TenDangNhap }}</strong>
+              <strong style="color: var(--gold);"><i class="fa-regular fa-circle-user"></i> {{ u.TenDangNhap }}</strong>
             </td>
             <td>
               <strong>{{ u.HoTen }}</strong>
@@ -65,52 +106,90 @@
             <td>{{ u.SoDienThoai or 'Chưa cập nhật' }}</td>
             <td>{{ u.Email or 'Chưa cập nhật' }}</td>
             <td style="color: var(--text-muted); font-size: 0.85rem;">{{ u.NgayTao }}</td>
+            <td style="text-align: center; white-space: nowrap;">
+              <div style="display: flex; gap: 0.4rem; justify-content: center; align-items: center;">
+                <!-- NÚT SỬA TÀI KHOẢN -->
+                <button type="button" class="btn btn-sm btn-secondary" 
+                        onclick="editUserFromRow(this)" 
+                        title="Chỉnh sửa thông tin" style="padding: 0.35rem 0.65rem; font-size: 0.8rem;">
+                  <i class="fa-solid fa-pen-to-square"></i> Sửa
+                </button>
+
+                <!-- NÚT XÓA TÀI KHOẢN (Bảo vệ tài khoản admin đang đăng nhập) -->
+                {% if u.TenDangNhap == user.username %}
+                  <span style="font-size: 0.72rem; color: var(--gold); padding: 0.3rem 0.6rem; background: rgba(212, 175, 55, 0.12); border-radius: var(--radius-sm); border: 1px dashed rgba(212, 175, 55, 0.4); font-weight: 600;" title="Tài khoản hiện đang đăng nhập của bạn">
+                    <i class="fa-solid fa-user-check"></i> Đang dùng
+                  </span>
+                {% else %}
+                  <form method="POST" action="/admin/users/{{ u.TenDangNhap }}/delete" style="display: inline;" 
+                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản [{{ u.TenDangNhap }}] khỏi hệ thống DynamoDB không? Thao tác này không thể hoàn tác!')">
+                    <button type="submit" class="btn btn-sm" 
+                            style="background: rgba(244, 63, 94, 0.15); color: #fda4af; border: 1px solid var(--rose); padding: 0.35rem 0.65rem; font-size: 0.8rem;" 
+                            title="Xóa tài khoản">
+                      <i class="fa-solid fa-trash-can"></i> Xóa
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
           </tr>
         {% endfor %}
+
+        <!-- DÒNG KHI KHÔNG TÌM THẤY KẾT QUẢ -->
+        <tr id="noResultsRow" style="display: none;">
+          <td colspan="7" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+            <i class="fa-solid fa-user-slash" style="font-size: 2.2rem; margin-bottom: 0.8rem; display: block; color: var(--text-muted);"></i>
+            <div style="font-size: 1rem; font-weight: 600; color: #ffffff;">Không tìm thấy tài khoản phù hợp</div>
+            <div style="font-size: 0.85rem; margin-top: 0.3rem;">Vui lòng kiểm tra lại từ khóa tìm kiếm của bạn.</div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- MODAL TẠO TÀI KHOẢN NHÂN VIÊN MỚI -->
+<!-- ========================================== -->
+<!-- 1. MODAL TẠO TÀI KHOẢN MỚI -->
+<!-- ========================================== -->
 <div class="modal-overlay" id="staffModal">
   <div class="modal-card">
     <div class="modal-header">
-      <h3 class="modal-title"><i class="fa-solid fa-user-shield"></i> Thêm Tài Khoản Nhân Viên Mới</h3>
+      <h3 class="modal-title"><i class="fa-solid fa-user-plus" style="color: var(--gold);"></i> Thêm Tài Khoản Mới</h3>
       <button type="button" class="modal-close" onclick="closeStaffModal()">&times;</button>
     </div>
 
     <form method="POST" action="/admin/users" style="display: flex; flex-direction: column; gap: 1.1rem;">
       <div class="filter-group">
-        <label for="staffRole">Vai Trò Phân Quyền</label>
+        <label for="staffRole"><i class="fa-solid fa-shield-halved"></i> Vai Trò Phân Quyền</label>
         <select id="staffRole" name="role" required class="form-control">
-          <option value="receptionist">Nhân Viên Lễ Tân (Xem phòng, Check-in, Check-out)</option>
-          <option value="admin">Quản Trị Viên (Toàn quyền quản lý phòng, tài khoản, backup)</option>
+          <option value="customer">Khách Hàng (Customer)</option>
+          <option value="receptionist" selected>Nhân Viên Lễ Tân (Receptionist)</option>
+          <option value="admin">Quản Trị Viên (Admin)</option>
         </select>
       </div>
 
       <div class="filter-group">
-        <label for="staffUsername">Tên Đăng Nhập</label>
-        <input type="text" id="staffUsername" name="username" required class="form-control" placeholder="letan_ca1">
+        <label for="staffUsername"><i class="fa-solid fa-user"></i> Tên Đăng Nhập</label>
+        <input type="text" id="staffUsername" name="username" required class="form-control" placeholder="ví dụ: letan_01">
       </div>
 
       <div class="filter-group">
-        <label for="staffPassword">Mật Khẩu Ban Đầu</label>
+        <label for="staffPassword"><i class="fa-solid fa-key"></i> Mật Khẩu Ban Đầu</label>
         <input type="password" id="staffPassword" name="password" required class="form-control" placeholder="••••••••">
       </div>
 
       <div class="filter-group">
-        <label for="staffName">Họ Và Tên</label>
+        <label for="staffName"><i class="fa-solid fa-id-card"></i> Họ Và Tên</label>
         <input type="text" id="staffName" name="name" required class="form-control" placeholder="Lê Văn Hùng">
       </div>
 
       <div class="filter-group">
-        <label for="staffPhone">Số Điện Thoại</label>
+        <label for="staffPhone"><i class="fa-solid fa-phone"></i> Số Điện Thoại</label>
         <input type="tel" id="staffPhone" name="phone" class="form-control" placeholder="0981234567">
       </div>
 
       <div class="filter-group">
-        <label for="staffEmail">Email Công Việc</label>
+        <label for="staffEmail"><i class="fa-solid fa-envelope"></i> Email</label>
         <input type="email" id="staffEmail" name="email" class="form-control" placeholder="hung.le@saigongrand.vn">
       </div>
 
@@ -123,15 +202,155 @@
     </form>
   </div>
 </div>
+
+<!-- ========================================== -->
+<!-- 2. MODAL CHỈNH SỬA TÀI KHOẢN -->
+<!-- ========================================== -->
+<div class="modal-overlay" id="editUserModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fa-solid fa-user-pen" style="color: var(--gold);"></i> Chỉnh Sửa Tài Khoản</h3>
+      <button type="button" class="modal-close" onclick="closeEditUserModal()">&times;</button>
+    </div>
+
+    <form id="editUserForm" method="POST" action="" style="display: flex; flex-direction: column; gap: 1.1rem;">
+      <div class="filter-group">
+        <label for="editUsername"><i class="fa-solid fa-user-lock"></i> Tên Đăng Nhập (Khóa Chính PK)</label>
+        <input type="text" id="editUsername" class="form-control" readonly style="background: rgba(255, 255, 255, 0.05); color: var(--gold); font-weight: 700; cursor: not-allowed;">
+        <small style="color: var(--text-muted); font-size: 0.75rem;">Tên đăng nhập là Partition Key trong DynamoDB nên không được sửa.</small>
+      </div>
+
+      <div class="filter-group">
+        <label for="editRole"><i class="fa-solid fa-shield-halved"></i> Vai Trò Phân Quyền</label>
+        <select id="editRole" name="role" required class="form-control">
+          <option value="customer">Khách Hàng (Customer)</option>
+          <option value="receptionist">Nhân Viên Lễ Tân (Receptionist)</option>
+          <option value="admin">Quản Trị Viên (Admin)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="editName"><i class="fa-solid fa-id-card"></i> Họ Và Tên</label>
+        <input type="text" id="editName" name="name" required class="form-control" placeholder="Họ và tên người dùng">
+      </div>
+
+      <div class="filter-group">
+        <label for="editPhone"><i class="fa-solid fa-phone"></i> Số Điện Thoại</label>
+        <input type="tel" id="editPhone" name="phone" class="form-control" placeholder="0981234567">
+      </div>
+
+      <div class="filter-group">
+        <label for="editEmail"><i class="fa-solid fa-envelope"></i> Email</label>
+        <input type="email" id="editEmail" name="email" class="form-control" placeholder="email@saigongrand.vn">
+      </div>
+
+      <div class="filter-group">
+        <label for="editNewPassword"><i class="fa-solid fa-key"></i> Đổi Mật Khẩu Mới (Tùy chọn)</label>
+        <input type="password" id="editNewPassword" name="new_password" class="form-control" placeholder="Để trống nếu giữ nguyên mật khẩu cũ">
+        <small style="color: var(--text-muted); font-size: 0.75rem;">Chỉ nhập khi bạn muốn thiết lập lại mật khẩu mới cho tài khoản này.</small>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 0.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeEditUserModal()">Đóng</button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-floppy-disk"></i> Lưu Thay Đổi
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
+  // Mở/Đóng Modal Thêm mới
   function openStaffModal() {
     document.getElementById('staffModal').classList.add('active');
   }
   function closeStaffModal() {
     document.getElementById('staffModal').classList.remove('active');
   }
+
+  // Mở/Đóng Modal Chỉnh Sửa
+  function editUserFromRow(btn) {
+    const row = btn.closest('.user-row');
+    if (!row) return;
+
+    const username = row.dataset.username || '';
+    const name = row.dataset.name || '';
+    const role = row.dataset.role || 'customer';
+    const phone = row.dataset.phone || '';
+    const email = row.dataset.email || '';
+
+    document.getElementById('editUsername').value = username;
+    document.getElementById('editName').value = name;
+    document.getElementById('editRole').value = role;
+    document.getElementById('editPhone').value = phone;
+    document.getElementById('editEmail').value = email;
+    document.getElementById('editNewPassword').value = '';
+    
+    // Gán đường dẫn action cho form
+    document.getElementById('editUserForm').action = '/admin/users/' + encodeURIComponent(username) + '/edit';
+    document.getElementById('editUserModal').classList.add('active');
+  }
+
+  function closeEditUserModal() {
+    document.getElementById('editUserModal').classList.remove('active');
+  }
+
+  // Tìm kiếm trực tiếp thời gian thực (Live Search)
+  function filterUsersLive() {
+    const input = document.getElementById('userSearchInput');
+    const query = input.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.user-row');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const noResultsRow = document.getElementById('noResultsRow');
+    let matchCount = 0;
+
+    if (clearBtn) {
+      clearBtn.style.display = query ? 'block' : 'none';
+    }
+
+    rows.forEach(row => {
+      const u = (row.dataset.username || '').toLowerCase();
+      const n = (row.dataset.name || '').toLowerCase();
+      const r = (row.dataset.role || '').toLowerCase();
+      const p = (row.dataset.phone || '').toLowerCase();
+      const e = (row.dataset.email || '').toLowerCase();
+
+      // Dịch vai trò sang tiếng Việt để người dùng tìm 'lễ tân', 'admin', 'khách' đều khớp
+      let roleVi = 'khách hàng';
+      if (r === 'admin') roleVi = 'quản trị viên admin';
+      else if (r === 'receptionist') roleVi = 'lễ tân receptionist';
+
+      const combinedText = `${u} ${n} ${r} ${roleVi} ${p} ${e}`;
+
+      if (combinedText.includes(query)) {
+        row.style.display = '';
+        matchCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    if (noResultsRow) {
+      noResultsRow.style.display = (matchCount === 0) ? '' : 'none';
+    }
+  }
+
+  function clearSearch() {
+    const input = document.getElementById('userSearchInput');
+    input.value = '';
+    filterUsersLive();
+    input.focus();
+  }
+
+  // Khởi chạy lọc nếu đã có query sẵn
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('userSearchInput');
+    if (input && input.value) {
+      filterUsersLive();
+    }
+  });
 </script>
 {% endblock %}
